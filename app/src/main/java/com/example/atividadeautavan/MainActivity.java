@@ -4,8 +4,10 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationRequest;
 import android.os.Bundle;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -17,6 +19,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,6 +42,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SearchView mapSearchView;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -89,7 +96,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onSuccess(Location location) {
                 if (location!= null){
+                    TextView textViewLabel3 = findViewById(R.id.textViewLabel3);
+                    TextView textViewLabel4 = findViewById(R.id.textViewLabel4);
                     currentLocation = location;
+
+                    textViewLabel3.setText("Latitude: " + String.valueOf(currentLocation.getLatitude()));
+                    textViewLabel4.setText("Latitude: " + String.valueOf(currentLocation.getLongitude()));
 
                     SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
                     mapFragment.getMapAsync(MainActivity.this);
