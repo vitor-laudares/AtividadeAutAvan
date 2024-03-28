@@ -13,6 +13,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -36,8 +37,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         myMap = googleMap;
 
         LatLng sydney = new LatLng(-34,151);
-        myMap.addMarker(new MarkerOptions().position(sydney).title("Sydney"));
         myMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        MarkerOptions options = new MarkerOptions().position(sydney).title("Sydney");
+        options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
+        myMap.addMarker(options);
 
     }
 }
