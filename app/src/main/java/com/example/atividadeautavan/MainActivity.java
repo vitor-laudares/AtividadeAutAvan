@@ -4,6 +4,8 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.location.LocationRequest;
 import android.os.Bundle;
 import android.view.Menu;
@@ -11,6 +13,8 @@ import android.view.MenuItem;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -33,6 +37,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.maps.model.Marker;
+import android.os.Handler;
+
 
 import java.io.IOException;
 import java.util.List;
@@ -44,6 +51,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SearchView mapSearchView;
     Location currentLocation;
     FusedLocationProviderClient fusedLocationProviderClient;
+    private Handler handler = new Handler();
+    private Marker marker;
+    private Marker sel;
+    private GpsData gpsData;
 
 
 
@@ -52,14 +63,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         mapSearchView = findViewById(R.id.mapSearch);
         mapSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 String location = mapSearchView.getQuery().toString();
                 List<Address> addressList = null;
-                if(location != null){
+                if (location != null) {
                     Geocoder geocoder = new Geocoder(MainActivity.this);
 
                     try {
@@ -68,10 +78,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         throw new RuntimeException(e);
                     }
 
+                    if ( sel!= null) {
+                        sel.remove();
+                    }
                     Address address = addressList.get(0);
-                    LatLng latLng = new LatLng(address.getLatitude(),address.getLongitude());
-                    myMap.addMarker(new MarkerOptions().position(latLng).title(location));
+                    LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
+                    sel = myMap.addMarker(new MarkerOptions().position(latLng).title(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
                     myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                    Region region = new Region(location, address.getLatitude(), address.getLongitude());
+
+
+
                 }
                 return false;
             }
@@ -97,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         task.addOnSuccessListener(new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if (location!= null){
+                if (location != null) {
                     TextView textViewLabel3 = findViewById(R.id.textViewLabel3);
                     TextView textViewLabel4 = findViewById(R.id.textViewLabel4);
                     currentLocation = location;
@@ -118,20 +135,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         myMap = googleMap;
 
-        LatLng sydney = new LatLng(currentLocation.getLatitude(),currentLocation.getLongitude());
+        LatLng sydney = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
         myMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        MarkerOptions options = new MarkerOptions().position(sydney).title("Minha Localização");
+        MarkerOptions options = new MarkerOptions().position(sydney).title("Localização Inicial");
         options.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         myMap.addMarker(options);
-        myMap.getUiSettings().setZoomControlsEnabled(true);
+        marker = myMap.addMarker(new MarkerOptions().position(sydney).title("Localização Atual"));
 
+        TextView textViewLabel3 = findViewById(R.id.textViewLabel3);
+        TextView textViewLabel4 = findViewById(R.id.textViewLabel4);
+
+        gpsData = new GpsData(this,textViewLabel3,textViewLabel4,handler,googleMap,marker);
+        handler.postDelayed(gpsData,0);
+        myMap.getUiSettings().setZoomControlsEnabled(true);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == FINE_PERMISSION_CODE){
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == FINE_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 getLastLocation();
             } else {
                 Toast.makeText(this, "Permissão Negada", Toast.LENGTH_SHORT).show();
@@ -149,21 +172,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
 
-        if(id==R.id.mapNone){
+        if (id == R.id.mapNone) {
             myMap.setMapType(GoogleMap.MAP_TYPE_NONE);
         }
-        if(id==R.id.mapNormal){
+        if (id == R.id.mapNormal) {
             myMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         }
-        if(id==R.id.mapSatellite){
+        if (id == R.id.mapSatellite) {
             myMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         }
-        if(id==R.id.mapHybrid){
+        if (id == R.id.mapHybrid) {
             myMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
         }
-        if(id==R.id.mapTerrain){
+        if (id == R.id.mapTerrain) {
             myMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
