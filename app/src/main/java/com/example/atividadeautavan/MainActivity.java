@@ -89,6 +89,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                     sel = myMap.addMarker(new MarkerOptions().position(latLng).title(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
                     myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
+                    Button myButton3 = findViewById(R.id.myButton3);
+                    myButton3.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
+                            Region region = new Region(address.getLocality(), address.getLatitude(), address.getLongitude());
+                            addRegion.addRegion(region);
+                        }
+                    });
 
                 }
                 return false;
