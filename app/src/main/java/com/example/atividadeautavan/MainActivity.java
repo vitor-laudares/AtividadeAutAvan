@@ -94,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void onClick(View v) {
                             // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
-                            Region region = new Region(address.getLocality(), address.getLatitude(), address.getLongitude());
+                            Region region = new Region(location, address.getLatitude(), address.getLongitude());
                             addRegion.addRegion(region);
                         }
                     });

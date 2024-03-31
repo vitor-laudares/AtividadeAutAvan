@@ -2,23 +2,33 @@ package com.example.atividadeautavan;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.Semaphore;
 
 
 public class AddRegion extends Thread {
     private LinkedList<Region> regionsQueue = new LinkedList<>();
     private int ordem = 1;
+    private Semaphore semaphore = new Semaphore(2);
 
     public void addRegion(Region region) {
-        synchronized (regionsQueue) {
+        try {
+            semaphore.acquire();
 
-            if (!isTooClose(region)) {
-                regionsQueue.add(region);
-                System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude());
-                System.out.println("A fila será impressa a seguir:");
-                printRegionsQueue();
-            } else {
-                System.out.println("A região não pode ser adicionada devido à proximidade com outra região na fila.");
+            synchronized (regionsQueue) {
+
+                if (!isTooClose(region)) {
+                    regionsQueue.add(region);
+                    System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude());
+                    System.out.println("A fila será impressa a seguir:");
+                    printRegionsQueue();
+                } else {
+                    System.out.println("A região não pode ser adicionada devido à proximidade com outra região na fila.");
+                }
             }
+        }catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            semaphore.release(); // Libera a permissão do semáforo
         }
     }
 
@@ -40,14 +50,22 @@ public class AddRegion extends Thread {
     }
 
     public void printRegionsQueue() {
-        synchronized (regionsQueue) {
-            for (Region region : regionsQueue) {
-                System.out.println(ordem + "° - " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude());
-                ordem = ordem + 1;
+        try {
+            semaphore.acquire();
+            synchronized (regionsQueue) {
+                for (Region region : regionsQueue) {
+                    System.out.println(ordem + "° - " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude());
+                    ordem = ordem + 1;
+                }
+                ordem = 1;
             }
-            ordem = 1;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            semaphore.release(); // Libera a permissão do semáforo
         }
     }
+
 
     private boolean isTooClose(Region newRegion) {
         for (Region region : regionsQueue) {
