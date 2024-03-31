@@ -10,6 +10,8 @@ import android.location.LocationRequest;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -55,12 +57,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker marker;
     private Marker sel;
     private GpsData gpsData;
-
+    private AddRegion addRegion;
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        addRegion = new AddRegion();
+        addRegion.start();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mapSearchView = findViewById(R.id.mapSearch);
@@ -85,9 +89,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
                     sel = myMap.addMarker(new MarkerOptions().position(latLng).title(location).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
                     myMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 10));
-                    Region region = new Region(location, address.getLatitude(), address.getLongitude());
-
-
 
                 }
                 return false;
@@ -148,6 +149,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         gpsData = new GpsData(this,textViewLabel3,textViewLabel4,handler,googleMap,marker);
         handler.postDelayed(gpsData,0);
         myMap.getUiSettings().setZoomControlsEnabled(true);
+        Button myButton = findViewById(R.id.myButton);
+        myButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
+                Region region = new Region("Localização Atual", marker.getPosition().latitude, marker.getPosition().longitude);
+                addRegion.addRegion(region);
+            }
+        });
     }
 
     @Override
