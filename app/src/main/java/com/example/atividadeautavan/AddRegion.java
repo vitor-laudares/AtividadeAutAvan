@@ -1,8 +1,12 @@
 package com.example.atividadeautavan;
 
+import android.content.Context;
+import android.widget.Toast;
+
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.Semaphore;
+import com.example.vitorautavan.Trinta;
 
 
 public class AddRegion extends Thread {
@@ -10,7 +14,9 @@ public class AddRegion extends Thread {
     private int ordem = 1;
     private Semaphore semaphore = new Semaphore(2);
 
-    public void addRegion(Region region) {
+
+
+    public void addRegion(Region region, Context mContext) {
         try {
             semaphore.acquire();
 
@@ -18,11 +24,13 @@ public class AddRegion extends Thread {
 
                 if (!isTooClose(region)) {
                     regionsQueue.add(region);
-                    System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude());
+                    System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                    Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
                     System.out.println("A fila será impressa a seguir:");
                     printRegionsQueue();
                 } else {
                     System.out.println("A região não pode ser adicionada devido à proximidade com outra região na fila.");
+                    Toast.makeText(mContext, "Região não adicionada (muito próxima)", Toast.LENGTH_SHORT).show();
                 }
             }
         }catch (InterruptedException e) {
@@ -54,7 +62,7 @@ public class AddRegion extends Thread {
             semaphore.acquire();
             synchronized (regionsQueue) {
                 for (Region region : regionsQueue) {
-                    System.out.println(ordem + "° - " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude());
+                    System.out.println("User: " +region.getUser()+ " Ordem: "+ ordem + "° - " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude()+ ", Time: " + region.getTimestamp());
                     ordem = ordem + 1;
                 }
                 ordem = 1;
@@ -69,26 +77,12 @@ public class AddRegion extends Thread {
 
     private boolean isTooClose(Region newRegion) {
         for (Region region : regionsQueue) {
-            double distance = calculateDistance(newRegion.getLatitude(), newRegion.getLongitude(), region.getLatitude(), region.getLongitude());
+            Trinta mTrinta = new Trinta();
+            double distance = mTrinta.trinta(newRegion.getLatitude(), newRegion.getLongitude(), region.getLatitude(), region.getLongitude());
             if (distance <= 30) {
                 return true;
             }
         }
         return false;
-    }
-
-    private double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
-        // Fórmula haversine para calcular a distância entre dois pontos na Terra
-        double R = 6371000; // raio da Terra em metros
-        double phi1 = Math.toRadians(lat1);
-        double phi2 = Math.toRadians(lat2);
-        double deltaPhi = Math.toRadians(lat2 - lat1);
-        double deltaLambda = Math.toRadians(lon2 - lon1);
-
-        double a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-                Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        return R * c;
     }
 }

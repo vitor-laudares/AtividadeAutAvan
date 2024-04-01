@@ -26,6 +26,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationResult;
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker sel;
     private GpsData gpsData;
     private AddRegion addRegion;
+    
 
 
 
@@ -94,8 +96,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void onClick(View v) {
                             // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
-                            Region region = new Region(location, address.getLatitude(), address.getLongitude());
-                            addRegion.addRegion(region);
+                            Region region = new Region(location, address.getLatitude(), address.getLongitude(), 201911007);
+                            addRegion.addRegion(region,MainActivity.this);
                         }
                     });
 
@@ -163,8 +165,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
-                Region region = new Region("Localização Atual", marker.getPosition().latitude, marker.getPosition().longitude);
-                addRegion.addRegion(region);
+                Region region = new Region("Localização Atual", marker.getPosition().latitude, marker.getPosition().longitude, 201911007);
+                addRegion.addRegion(region, MainActivity.this);
             }
         });
     }

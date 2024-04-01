@@ -29,4 +29,5 @@ mediarouter = { group = "androidx.mediarouter", name = "mediarouter", version.re
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
+androidLibrary = { id = "com.android.library", version.ref = "agp" }
 

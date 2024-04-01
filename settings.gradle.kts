@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AtividadeAutAvan"
 include(":app")
- 
+include(":vitorautavan")
