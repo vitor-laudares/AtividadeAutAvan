@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "340242357678",
+    "project_id": "autavan-c0096",
+    "storage_bucket": "autavan-c0096.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:340242357678:android:6965de3d7f05db8ef3bc3f",
+        "android_client_info": {
+          "package_name": "com.example.atividadeautavan"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFd4QbCxmZHaDjiaDgP_H3UzC0CNbtyMY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

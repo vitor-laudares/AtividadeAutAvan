@@ -1,5 +1,9 @@
 package com.example.atividadeautavan;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 public class Region {
 
     private String name;
@@ -8,12 +12,17 @@ public class Region {
     private int user;
     private long timestamp;
 
+
     public Region(String name, double latitude, double longitude, int user){
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.user = user;
         this.timestamp = System.nanoTime();
+    }
+
+    public Region(){
+
     }
 
     public String getNome() {
@@ -54,7 +63,7 @@ public class Region {
         this.user = user;
     }
 
-    public long getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 

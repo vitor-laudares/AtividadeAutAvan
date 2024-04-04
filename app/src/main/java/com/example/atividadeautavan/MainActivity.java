@@ -41,6 +41,8 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.maps.model.Marker;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import android.os.Handler;
 
 
@@ -59,13 +61,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Marker sel;
     private GpsData gpsData;
     private AddRegion addRegion;
-    
+
+
 
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        addRegion = new AddRegion();
+        addRegion = new AddRegion(MainActivity.this);
         addRegion.start();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

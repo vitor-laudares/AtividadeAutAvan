@@ -1,33 +1,72 @@
 package com.example.atividadeautavan;
 
+import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+
+import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Queue;
+import java.util.Map;
 import java.util.concurrent.Semaphore;
-import com.example.vitorautavan.Trinta;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class AddRegion extends Thread {
     private LinkedList<Region> regionsQueue = new LinkedList<>();
     private int ordem = 1;
     private Semaphore semaphore = new Semaphore(2);
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private Context mContext;
+
+    public AddRegion(Context mContext){
+        this.mContext = mContext;
+
+    }
 
 
 
     public void addRegion(Region region, Context mContext) {
+        AtomicBoolean ResBd = new AtomicBoolean();
+        ResBd.set(false);
+        AtomicBoolean ResFila = new AtomicBoolean();
+        ResFila.set(false);
+        ConsultaBD30 consultaBd = new ConsultaBD30(region, db, ResBd);
+        ConsultaFila30 consultaFila = new ConsultaFila30(region, regionsQueue, ResFila);
+        consultaFila.start();
+        consultaBd.start();
+
+        try {
+            consultaFila.join();
+            consultaBd.join();// Espera a thread ConsultaFila30 terminar
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
         try {
             semaphore.acquire();
-
             synchronized (regionsQueue) {
-
-                if (!isTooClose(region)) {
-                    regionsQueue.add(region);
-                    System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
-                    Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
-                    System.out.println("A fila será impressa a seguir:");
-                    printRegionsQueue();
+                if (!ResFila.get()) {
+                    if(!ResBd.get()) {
+                        regionsQueue.add(region);
+                        System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                        Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
+                        System.out.println("A fila será impressa a seguir:");
+                        printRegionsQueue();
+                    } else {
+                        System.out.println("A região não pode ser adicionada devido à proximidade com outra região no BD.");
+                        Toast.makeText(mContext, "Região não adicionada (muito próxima)", Toast.LENGTH_SHORT).show();
+                    }
                 } else {
                     System.out.println("A região não pode ser adicionada devido à proximidade com outra região na fila.");
                     Toast.makeText(mContext, "Região não adicionada (muito próxima)", Toast.LENGTH_SHORT).show();
@@ -46,7 +85,46 @@ public class AddRegion extends Thread {
             synchronized (regionsQueue) {
                 if (!regionsQueue.isEmpty()) {
                     Region region = regionsQueue.peekLast();
-                    // Aqui você pode processar a região, por exemplo, salvar em um banco de dados
+                    Button myButton2 =  ((Activity) mContext).findViewById(R.id.myButton2);
+                    myButton2.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Gravar todos os elementos da fila no Firestore
+                            for (Region region : regionsQueue) {
+                                // Criar um mapa de dados para o objeto Region
+                                Map<String, Object> data = new HashMap<>();
+                                data.put("name", region.getNome());
+                                data.put("latitude", region.getLatitude());
+                                data.put("longitude", region.getLongitude());
+                                data.put("user", region.getUser());
+                                data.put("timestamp", region.getTimestamp());
+
+                                // Adicionar os dados ao Firestore
+                                db.collection("DadosAutAvan")
+                                        .add(data)
+                                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                            @Override
+                                            public void onSuccess(DocumentReference documentReference) {
+                                                // Se a adição for bem-sucedida, você pode remover o elemento da fila
+                                                synchronized (regionsQueue) {
+                                                    regionsQueue.remove(region);
+                                                }
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                // Lidar com falha ao adicionar dados
+                                                Toast.makeText(mContext, "Erro ao adicionar região ao Firestore", Toast.LENGTH_SHORT).show();
+                                                Log.e("Firestore", "Erro ao adicionar região ao Firestore", e);
+                                            }
+                                        });
+                            }
+                            Toast.makeText(mContext, "Regiões Adicionadas no BD e removidas da fila", Toast.LENGTH_SHORT).show();
+
+                        }
+
+                    });
                 }
             }
             try {
@@ -74,15 +152,4 @@ public class AddRegion extends Thread {
         }
     }
 
-
-    private boolean isTooClose(Region newRegion) {
-        for (Region region : regionsQueue) {
-            Trinta mTrinta = new Trinta();
-            double distance = mTrinta.trinta(newRegion.getLatitude(), newRegion.getLongitude(), region.getLatitude(), region.getLongitude());
-            if (distance <= 30) {
-                return true;
-            }
-        }
-        return false;
-    }
 }
