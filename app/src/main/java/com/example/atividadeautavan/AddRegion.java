@@ -15,6 +15,9 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.example.vitorautavan.Region;
+import com.example.vitorautavan.RestrictedRegion;
+import com.example.vitorautavan.SubRegion;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
@@ -27,6 +30,11 @@ public class AddRegion extends Thread {
     private Semaphore semaphore = new Semaphore(2);
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Context mContext;
+    private static int alterna = 1;
+    private double lat;
+    private double lon;
+    private static Region mainRegion;
+
 
     public AddRegion(Context mContext){
         this.mContext = mContext;
@@ -35,13 +43,16 @@ public class AddRegion extends Thread {
 
 
 
-    public void addRegion(Region region, Context mContext) {
+    public void addRegion(double lat, double lon, Context mContext) {
         AtomicBoolean ResBd = new AtomicBoolean();
         ResBd.set(false);
         AtomicBoolean ResFila = new AtomicBoolean();
         ResFila.set(false);
-        ConsultaBD30 consultaBd = new ConsultaBD30(region, db, ResBd);
-        ConsultaFila30 consultaFila = new ConsultaFila30(region, regionsQueue, ResFila);
+        AtomicBoolean Res5 = new AtomicBoolean();
+        Res5.set(false);
+
+        ConsultaBD30 consultaBd = new ConsultaBD30(mainRegion, lat, lon, db, ResBd, Res5);
+        ConsultaFila30 consultaFila = new ConsultaFila30(mainRegion, lat, lon, regionsQueue, ResFila, Res5);
         consultaFila.start();
         consultaBd.start();
 
@@ -58,18 +69,63 @@ public class AddRegion extends Thread {
             synchronized (regionsQueue) {
                 if (!ResFila.get()) {
                     if(!ResBd.get()) {
+
+                        Region region = new Region("Região", lat, lon, 201911007);
                         regionsQueue.add(region);
-                        System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
-                        Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
-                        System.out.println("A fila será impressa a seguir:");
-                        printRegionsQueue();
+                            System.out.println("Processando: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
+                            System.out.println("A fila será impressa a seguir:");
+                            printRegionsQueue();
                     } else {
+                        if (!Res5.get()) {
+                            if(alterna == 1) {
+                                SubRegion region = new SubRegion(mainRegion, "Sub Região", lat, lon, 201911007);
+                                regionsQueue.add(region);
+                                System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                                Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                                System.out.println("A fila será impressa a seguir:");
+                                printRegionsQueue();
+                                alterna = 0;
+                            }else {
+                                RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat, lon, 201911007);
+                                alterna = 1;
+                                regionsQueue.add(region);
+                                System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                                Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                                System.out.println("A fila será impressa a seguir:");
+                                printRegionsQueue();
+                            }
+
+                        }else{
                         System.out.println("A região não pode ser adicionada devido à proximidade com outra região no BD.");
                         Toast.makeText(mContext, "Região não adicionada (muito próxima)", Toast.LENGTH_SHORT).show();
+                        }
+
                     }
                 } else {
-                    System.out.println("A região não pode ser adicionada devido à proximidade com outra região na fila.");
-                    Toast.makeText(mContext, "Região não adicionada (muito próxima)", Toast.LENGTH_SHORT).show();
+                    if (!Res5.get()) {
+                        if(alterna == 1) {
+                            SubRegion region = new SubRegion(mainRegion, "Sub Região", lat, lon, 201911007);
+                            regionsQueue.add(region);
+                            System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                            System.out.println("A fila será impressa a seguir:");
+                            printRegionsQueue();
+                            alterna = 0;
+                        }else {
+                            RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat, lon, 201911007);
+                            alterna = 1;
+                            regionsQueue.add(region);
+                            System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                            System.out.println("A fila será impressa a seguir:");
+                            printRegionsQueue();
+                            alterna = 1;
+                        }
+                    }else {
+                        System.out.println("A região não pode ser adicionada devido à proximidade com outra região na fila.");
+                        Toast.makeText(mContext, "Região não adicionada (muito próxima)", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         }catch (InterruptedException e) {
@@ -99,8 +155,19 @@ public class AddRegion extends Thread {
                                 data.put("user", region.getUser());
                                 data.put("timestamp", region.getTimestamp());
 
+                                String colecao = null;
+
+                                if (region instanceof SubRegion){
+                                    colecao = "Sub Região";
+                                } else if(region instanceof RestrictedRegion){
+                                    colecao = "Região Restrita";
+                                } else {
+                                    colecao = "Região";
+                                }
+
+
                                 // Adicionar os dados ao Firestore
-                                db.collection("DadosAutAvan")
+                                db.collection(colecao)
                                         .add(data)
                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                             @Override
@@ -151,5 +218,11 @@ public class AddRegion extends Thread {
             semaphore.release(); // Libera a permissão do semáforo
         }
     }
+
+    public static void setMainRegion(Region mainRegion1){
+        mainRegion = mainRegion1;
+    }
+
+
 
 }

@@ -4,9 +4,6 @@ import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.location.LocationRequest;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,21 +12,14 @@ import android.widget.Button;
 import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.app.AlertDialog;
-import android.content.DialogInterface;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 
+import com.example.vitorautavan.Region;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -41,7 +31,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.maps.model.Marker;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 import android.os.Handler;
 
@@ -99,8 +88,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         @Override
                         public void onClick(View v) {
                             // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
-                            Region region = new Region(location, address.getLatitude(), address.getLongitude(), 201911007);
-                            addRegion.addRegion(region,MainActivity.this);
+                            addRegion.addRegion(address.getLatitude(),address.getLongitude(),MainActivity.this);
                         }
                     });
 
@@ -168,8 +156,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(View v) {
                 // Supondo que currentLocation e mapSearchView.getQuery().toString() já estejam definidos
-                Region region = new Region("Localização Atual", marker.getPosition().latitude, marker.getPosition().longitude, 201911007);
-                addRegion.addRegion(region, MainActivity.this);
+                addRegion.addRegion(marker.getPosition().latitude,marker.getPosition().longitude,MainActivity.this);
+
             }
         });
     }

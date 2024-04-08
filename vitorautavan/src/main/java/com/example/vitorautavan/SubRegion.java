@@ -1,12 +1,24 @@
 package com.example.vitorautavan;
 
-public class Trinta {
 
-    public Trinta() {
+public class SubRegion extends Region{
+    private Region mainRegion;
+
+
+
+
+    public SubRegion(Region mainRegion, String name, double latitude, double longitude, int user){
+
+        super(name, latitude, longitude, user);
 
     }
 
-    public double trinta(double lat1, double lon1, double lat2, double lon2) {
+    public SubRegion() {
+    }
+
+
+    @Override
+    public boolean calcularDistancia(double lat1, double lon1, double lat2, double lon2) {
 
 
         // Fórmula haversine para calcular a distância entre dois pontos na Terra
@@ -20,6 +32,15 @@ public class Trinta {
                 Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        return R * c;
+        double d =  R * c;
+        if (d<=5){
+            return true;
+
+        } else{
+            return false;
+        }
+
+
     }
+
 }

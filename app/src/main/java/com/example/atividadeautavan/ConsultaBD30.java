@@ -1,22 +1,12 @@
 package com.example.atividadeautavan;
 
-import static android.content.ContentValues.TAG;
-
-import android.os.Handler;
-import android.util.Log;
-
-import androidx.annotation.NonNull;
-
-import com.example.vitorautavan.Trinta;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.example.vitorautavan.Region;
+import com.example.vitorautavan.RestrictedRegion;
+import com.example.vitorautavan.SubRegion;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.android.gms.tasks.OnCompleteListener;
 
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -24,43 +14,72 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ConsultaBD30 extends Thread{
 
     private final AtomicBoolean Res;
+    private final AtomicBoolean Res5;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static boolean regionFound = false;
-    public Region newRegion;
+    private double lat;
+    private double lon;
 
 
-
-    public ConsultaBD30(Region newRegion, FirebaseFirestore db, AtomicBoolean Res) {
-        this.newRegion = newRegion;
+    public ConsultaBD30(Region mainRegion, double Lat, double Lon, FirebaseFirestore db, AtomicBoolean Res, AtomicBoolean Res5) {
         this.db = db;
         this.Res = Res;
+        this.Res5 = Res5;
+        this.lat = Lat;
+        this.lon = Lon;
     }
 
     @Override
     public void run(){
+
         varrerDb();
     }
 
-    public boolean varrerDb() {
+    public void varrerDb() {
 
         try {
-            QuerySnapshot querySnapshot = Tasks.await(db.collection("DadosAutAvan").get()); // Realiza a consulta síncrona ao Firestore
+            QuerySnapshot querySnapshot = Tasks.await(db.collection("Região").get()); // Realiza a consulta síncrona ao Firestore
             for (QueryDocumentSnapshot document : querySnapshot) {
-                Region dbRegion = document.toObject(Region.class); // Converte o documento em um objeto Regiao
+                Region region = document.toObject(Region.class);
+                    boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
+                    if(d){
+                        Res.set(true);
+                    }
 
-                // Calcula a distância entre a região candidata e a região atual
-                Trinta mTrinta = new Trinta();
-                Double distancia = mTrinta.trinta(newRegion.getLatitude() , newRegion.getLongitude() , dbRegion.getLatitude() , dbRegion.getLongitude());
-
-                if(distancia <= 30){ // Verifica se a distância é menor ou igual a 30
-                    Res.set(true); // Define que existe uma região próxima
-                    return true; // Interrompe a consulta
-                }
             }
-            return false;
         } catch (ExecutionException | InterruptedException e) {
             e.printStackTrace();
-            return false;
+        }
+
+
+
+        try {
+            QuerySnapshot querySnapshot = Tasks.await(db.collection("Sub Região").get()); // Realiza a consulta síncrona ao Firestore
+            for (QueryDocumentSnapshot document : querySnapshot) {
+                SubRegion region = document.toObject(SubRegion.class);
+                boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
+                if(d){
+                    Res5.set(true);
+                }
+
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        try {
+            QuerySnapshot querySnapshot = Tasks.await(db.collection("Região Restrita").get()); // Realiza a consulta síncrona ao Firestore
+            for (QueryDocumentSnapshot document : querySnapshot) {
+                RestrictedRegion region = document.toObject(RestrictedRegion.class);
+                boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
+                if(d){
+                    Res5.set(true);
+                }
+
+            }
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
