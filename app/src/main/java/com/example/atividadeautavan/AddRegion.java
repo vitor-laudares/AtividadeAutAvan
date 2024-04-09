@@ -9,19 +9,25 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.example.vitorautavan.Cryptography;
 import com.example.vitorautavan.Region;
 import com.example.vitorautavan.RestrictedRegion;
 import com.example.vitorautavan.SubRegion;
+import com.example.vitorautavan.JsonUtil;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
 
 
 public class AddRegion extends Thread {
@@ -67,10 +73,15 @@ public class AddRegion extends Thread {
         try {
             semaphore.acquire();
             synchronized (regionsQueue) {
+                String lat1 = String.valueOf(lat);
+                String lon1 = String.valueOf(lon);
+                String user1 = String.valueOf(201911007);
                 if (!ResFila.get()) {
                     if(!ResBd.get()) {
 
-                        Region region = new Region("Região", lat, lon, 201911007);
+                        Region region = new Region("Região", lat1, lon1, user1);
+                        serialize(region);
+
                         regionsQueue.add(region);
                             System.out.println("Processando: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                             Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
@@ -79,7 +90,8 @@ public class AddRegion extends Thread {
                     } else {
                         if (!Res5.get()) {
                             if(alterna == 1) {
-                                SubRegion region = new SubRegion("Sub Região", lat, lon, 201911007);
+                                SubRegion region = new SubRegion(mainRegion, "Sub Região", lat1, lon1, user1);
+                                serialize(region);
                                 regionsQueue.add(region);
                                 System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                                 Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
@@ -87,7 +99,8 @@ public class AddRegion extends Thread {
                                 printRegionsQueue();
                                 alterna = 0;
                             }else {
-                                RestrictedRegion region = new RestrictedRegion("Região Restrita", lat, lon, 201911007);
+                                RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat1, lon1, user1);
+                                serialize(region);
                                 alterna = 1;
                                 regionsQueue.add(region);
                                 System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
@@ -105,7 +118,8 @@ public class AddRegion extends Thread {
                 } else {
                     if (!Res5.get()) {
                         if(alterna == 1) {
-                            SubRegion region = new SubRegion("Sub Região", lat, lon, 201911007);
+                            SubRegion region = new SubRegion(mainRegion, "Sub Região", lat1, lon1, user1);
+                            serialize(region);
                             regionsQueue.add(region);
                             System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                             Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
@@ -113,7 +127,8 @@ public class AddRegion extends Thread {
                             printRegionsQueue();
                             alterna = 0;
                         }else {
-                            RestrictedRegion region = new RestrictedRegion("Região Restrita", lat, lon, 201911007);
+                            RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat1, lon1, user1);
+                            serialize(region);
                             alterna = 1;
                             regionsQueue.add(region);
                             System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
@@ -149,22 +164,30 @@ public class AddRegion extends Thread {
                             for (Region region : regionsQueue) {
                                 // Criar um mapa de dados para o objeto Region
                                 Map<String, Object> data = new HashMap<>();
+
                                 data.put("name", region.getNome());
                                 data.put("latitude", region.getLatitude());
                                 data.put("longitude", region.getLongitude());
                                 data.put("user", region.getUser());
                                 data.put("timestamp", region.getTimestamp());
 
+
+
                                 String colecao = null;
 
                                 if(region instanceof SubRegion){
                                     colecao = "Sub Região";
+                                    data.put("mainRegion", ((SubRegion) region).getMainRegion());
+
                                 } else if(region instanceof RestrictedRegion){
                                     colecao = "Região Restrita";
+                                    data.put("mainRegion", ((RestrictedRegion) region).getMainRegion());
+
                                 } else {
                                     colecao = "Região";
-                                }
+                                    data.put("mainRegion", ("Nulo"));
 
+                                }
 
                                 // Adicionar os dados ao Firestore
                                 db.collection(colecao)
@@ -221,6 +244,21 @@ public class AddRegion extends Thread {
 
     public static void setMainRegion(Region mainRegion1){
         mainRegion = mainRegion1;
+    }
+
+    public void serialize(Region region) {
+        JsonUtil gson = new JsonUtil();
+        String regionJson = gson.toJson(region);
+        try {
+            region.setNome(Cryptography.encrypt(region.getNome()));
+            region.setLatitude(Cryptography.encrypt(String.valueOf(region.getLatitude())));
+            region.setLongitude(Cryptography.encrypt(String.valueOf(region.getLongitude())));
+            region.setTimestamp(Cryptography.encrypt(String.valueOf(region.getTimestamp())));
+            region.setUser(Cryptography.encrypt(String.valueOf(region.getUser())));
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 

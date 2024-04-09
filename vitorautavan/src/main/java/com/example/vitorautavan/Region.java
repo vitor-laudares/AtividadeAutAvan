@@ -1,24 +1,20 @@
 package com.example.vitorautavan;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
 public class Region {
 
     protected String name;
-    protected double latitude;
-    protected double longitude;
-    protected int user;
-    protected long timestamp;
+    protected String latitude;
+    protected String longitude;
+    protected String user;
+    protected String timestamp;
 
 
-    public Region(String name, double latitude, double longitude, int user){
+    public Region(String name, String latitude, String longitude, String user){
         this.name = name;
         this.latitude = latitude;
         this.longitude = longitude;
         this.user = user;
-        this.timestamp = System.nanoTime();
+        this.timestamp = String.valueOf(System.nanoTime());
     }
 
     public Region(){
@@ -35,39 +31,39 @@ public class Region {
         this.name = nome;
     }
 
-    public double getLatitude() {
+    public String getLatitude() {
 
-        return latitude;
+        return String.valueOf(latitude);
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(String latitude) {
 
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public String getLongitude() {
 
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(String longitude) {
 
         this.longitude = longitude;
     }
 
-    public int getUser() {
+    public String getUser() {
         return user;
     }
 
-    public void setUser(int user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
-    public Long getTimestamp() {
+    public String getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(long timestamp) {
+    public void setTimestamp(String timestamp) {
 
         this.timestamp = timestamp;
     }

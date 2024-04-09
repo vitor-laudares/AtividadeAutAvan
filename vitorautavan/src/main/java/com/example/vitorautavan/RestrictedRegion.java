@@ -6,9 +6,10 @@ public class RestrictedRegion extends Region {
     private Region mainRegion;
     private boolean restricted;
 
-    public RestrictedRegion(String name, double latitude, double longitude, int user){
+    public RestrictedRegion(Region mainRegion, String name, String latitude, String longitude, String user){
 
         super(name, latitude, longitude, user);
+        this.mainRegion=mainRegion;
 
     }
     public RestrictedRegion() {
@@ -41,6 +42,11 @@ public class RestrictedRegion extends Region {
        }
 
 
+    }
+
+
+    public Region getMainRegion() {
+        return mainRegion;
     }
 
 }

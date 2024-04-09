@@ -1,5 +1,6 @@
 package com.example.atividadeautavan;
 
+import com.example.vitorautavan.Cryptography;
 import com.example.vitorautavan.Region;
 import com.example.vitorautavan.RestrictedRegion;
 import com.example.vitorautavan.SubRegion;
@@ -17,6 +18,8 @@ public class ConsultaFila30 extends Thread{
 
     public static double lat;
     public static double lon;
+    public static double dlat;
+    public static double dlon;
 
     public ConsultaFila30(Region mainRegion, double Lat, double Lon, LinkedList<Region> regionsQueue, AtomicBoolean Res , AtomicBoolean Res5){
 
@@ -40,25 +43,40 @@ public class ConsultaFila30 extends Thread{
 
     public static void isTooClose() {
         for (Region region : regionsQueue) {
+            try {
+                decryptRegionAttributes(region);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             if(region instanceof SubRegion){
-                boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
+                boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if (d) {
                     Res5.set(true);
+                    AddRegion.setMainRegion(region);
+                    break;
 
                 }
             } else if (region instanceof RestrictedRegion){
-                boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
+                boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if (d) {
                     Res5.set(true);
+                    AddRegion.setMainRegion(region);
+                    break;
                 }
             } else {
-                boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
+                boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if (d) {
                     Res.set(true);
                 }
             }
         }
 
+    }
+
+    private static void decryptRegionAttributes(Region region) throws Exception {
+        dlat  = Double.parseDouble(Cryptography.decrypt(String.valueOf(region.getLatitude())));
+        dlon  = Double.parseDouble(Cryptography.decrypt(String.valueOf(region.getLongitude())));
+        // Você deve fazer o mesmo para os outros atributos que precisam ser descriptografados
     }
 
 }
