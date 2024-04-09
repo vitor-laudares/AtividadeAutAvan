@@ -79,7 +79,7 @@ public class AddRegion extends Thread {
                     } else {
                         if (!Res5.get()) {
                             if(alterna == 1) {
-                                SubRegion region = new SubRegion(mainRegion, "Sub Região", lat, lon, 201911007);
+                                SubRegion region = new SubRegion("Sub Região", lat, lon, 201911007);
                                 regionsQueue.add(region);
                                 System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                                 Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
@@ -87,7 +87,7 @@ public class AddRegion extends Thread {
                                 printRegionsQueue();
                                 alterna = 0;
                             }else {
-                                RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat, lon, 201911007);
+                                RestrictedRegion region = new RestrictedRegion("Região Restrita", lat, lon, 201911007);
                                 alterna = 1;
                                 regionsQueue.add(region);
                                 System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
@@ -105,7 +105,7 @@ public class AddRegion extends Thread {
                 } else {
                     if (!Res5.get()) {
                         if(alterna == 1) {
-                            SubRegion region = new SubRegion(mainRegion, "Sub Região", lat, lon, 201911007);
+                            SubRegion region = new SubRegion("Sub Região", lat, lon, 201911007);
                             regionsQueue.add(region);
                             System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                             Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
@@ -113,7 +113,7 @@ public class AddRegion extends Thread {
                             printRegionsQueue();
                             alterna = 0;
                         }else {
-                            RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat, lon, 201911007);
+                            RestrictedRegion region = new RestrictedRegion("Região Restrita", lat, lon, 201911007);
                             alterna = 1;
                             regionsQueue.add(region);
                             System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
@@ -157,7 +157,7 @@ public class AddRegion extends Thread {
 
                                 String colecao = null;
 
-                                if (region instanceof SubRegion){
+                                if(region instanceof SubRegion){
                                     colecao = "Sub Região";
                                 } else if(region instanceof RestrictedRegion){
                                     colecao = "Região Restrita";

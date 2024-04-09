@@ -7,7 +7,7 @@ public class SubRegion extends Region{
 
 
 
-    public SubRegion(Region mainRegion, String name, double latitude, double longitude, int user){
+    public SubRegion(String name, double latitude, double longitude, int user){
 
         super(name, latitude, longitude, user);
 

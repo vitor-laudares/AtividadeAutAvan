@@ -6,7 +6,7 @@ public class RestrictedRegion extends Region {
     private Region mainRegion;
     private boolean restricted;
 
-    public RestrictedRegion(Region mainRegion, String name, double latitude, double longitude, int user){
+    public RestrictedRegion(String name, double latitude, double longitude, int user){
 
         super(name, latitude, longitude, user);
 

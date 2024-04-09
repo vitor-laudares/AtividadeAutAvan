@@ -40,12 +40,10 @@ public class ConsultaFila30 extends Thread{
 
     public static void isTooClose() {
         for (Region region : regionsQueue) {
-            String elementName = region.getNome();
             if(region instanceof SubRegion){
                 boolean d = region.calcularDistancia(lat , lon , region.getLatitude() , region.getLongitude());
                 if (d) {
                     Res5.set(true);
-                    AddRegion.setMainRegion(region);
 
                 }
             } else if (region instanceof RestrictedRegion){
