@@ -21,9 +21,9 @@ public class ConsultaFila30 extends Thread{
     public static double dlat;
     public static double dlon;
 
-    public ConsultaFila30(Region mainRegion, double Lat, double Lon, LinkedList<Region> regionsQueue, AtomicBoolean Res , AtomicBoolean Res5){
+    public ConsultaFila30( double Lat, double Lon, LinkedList<Region> regionsQueue, AtomicBoolean Res , AtomicBoolean Res5){
 
-        this.newRegion = newRegion;
+
         this.regionsQueue = regionsQueue;
         this.Res = Res;
         this.Res5 = Res5;
@@ -52,7 +52,6 @@ public class ConsultaFila30 extends Thread{
                 boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if (d) {
                     Res5.set(true);
-                    AddRegion.setMainRegion(region);
                     break;
 
                 }
@@ -60,13 +59,13 @@ public class ConsultaFila30 extends Thread{
                 boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if (d) {
                     Res5.set(true);
-                    AddRegion.setMainRegion(region);
                     break;
                 }
             } else {
                 boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if (d) {
                     Res.set(true);
+                    AddRegion.setMainRegion(region);
                 }
             }
         }

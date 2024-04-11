@@ -18,14 +18,14 @@ public class ConsultaBD30 extends Thread{
     private final AtomicBoolean Res5;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static boolean regionFound = false;
-    private double lat;
-    private double lon;
+    private static double lat;
+    private static double lon;
 
     public static double dlat;
     public static double dlon;
 
 
-    public ConsultaBD30(Region mainRegion, double Lat, double Lon, FirebaseFirestore db, AtomicBoolean Res, AtomicBoolean Res5) {
+    public ConsultaBD30(double Lat, double Lon, FirebaseFirestore db, AtomicBoolean Res, AtomicBoolean Res5) {
         this.db = db;
         this.Res = Res;
         this.Res5 = Res5;
@@ -70,7 +70,6 @@ public class ConsultaBD30 extends Thread{
                 boolean d = region.calcularDistancia(lat , lon , dlat , dlon);
                 if(d){
                     Res5.set(true);
-                    AddRegion.setMainRegion(region);
                     break;
                 }
 
@@ -105,7 +104,6 @@ public class ConsultaBD30 extends Thread{
     private static void decryptRegionAttributes(Region region) throws Exception {
         dlat  = Double.parseDouble(Cryptography.decrypt(String.valueOf(region.getLatitude())));
         dlon  = Double.parseDouble(Cryptography.decrypt(String.valueOf(region.getLongitude())));
-        // Você deve fazer o mesmo para os outros atributos que precisam ser descriptografados
     }
 
 

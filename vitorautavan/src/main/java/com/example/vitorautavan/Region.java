@@ -21,7 +21,7 @@ public class Region {
 
     }
 
-    public String getNome() {
+    public String getName() {
 
         return name;
     }

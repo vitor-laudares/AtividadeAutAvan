@@ -37,8 +37,6 @@ public class AddRegion extends Thread {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private Context mContext;
     private static int alterna = 1;
-    private double lat;
-    private double lon;
     private static Region mainRegion;
 
 
@@ -57,8 +55,8 @@ public class AddRegion extends Thread {
         AtomicBoolean Res5 = new AtomicBoolean();
         Res5.set(false);
 
-        ConsultaBD30 consultaBd = new ConsultaBD30(mainRegion, lat, lon, db, ResBd, Res5);
-        ConsultaFila30 consultaFila = new ConsultaFila30(mainRegion, lat, lon, regionsQueue, ResFila, Res5);
+        ConsultaBD30 consultaBd = new ConsultaBD30(lat, lon, db, ResBd, Res5);
+        ConsultaFila30 consultaFila = new ConsultaFila30(lat, lon, regionsQueue, ResFila, Res5);
         consultaFila.start();
         consultaBd.start();
 
@@ -83,7 +81,7 @@ public class AddRegion extends Thread {
                         serialize(region);
 
                         regionsQueue.add(region);
-                            System.out.println("Processando: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            System.out.println("Processando: " + "Localização Atual" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                             Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
                             System.out.println("A fila será impressa a seguir:");
                             printRegionsQueue();
@@ -93,20 +91,20 @@ public class AddRegion extends Thread {
                                 SubRegion region = new SubRegion(mainRegion, "Sub Região", lat1, lon1, user1);
                                 serialize(region);
                                 regionsQueue.add(region);
-                                System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
-                                Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                                System.out.println("Processando região: " + "Sub Região" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                                Toast.makeText(mContext, "Adicionada " + "Sub Região", Toast.LENGTH_SHORT).show();
                                 System.out.println("A fila será impressa a seguir:");
                                 printRegionsQueue();
                                 alterna = 0;
                             }else {
                                 RestrictedRegion region = new RestrictedRegion(mainRegion, "Região Restrita", lat1, lon1, user1);
                                 serialize(region);
-                                alterna = 1;
                                 regionsQueue.add(region);
-                                System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
-                                Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                                System.out.println("Processando região: " + "Região Restrita" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                                Toast.makeText(mContext, "Adicionada " + "Região Restrita", Toast.LENGTH_SHORT).show();
                                 System.out.println("A fila será impressa a seguir:");
                                 printRegionsQueue();
+                                alterna = 1;
                             }
 
                         }else{
@@ -121,8 +119,8 @@ public class AddRegion extends Thread {
                             SubRegion region = new SubRegion(mainRegion, "Sub Região", lat1, lon1, user1);
                             serialize(region);
                             regionsQueue.add(region);
-                            System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
-                            Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                            System.out.println("Processando região: " + "Sub Região" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            Toast.makeText(mContext, "Adicionada " + "Sub Região", Toast.LENGTH_SHORT).show();
                             System.out.println("A fila será impressa a seguir:");
                             printRegionsQueue();
                             alterna = 0;
@@ -131,8 +129,8 @@ public class AddRegion extends Thread {
                             serialize(region);
                             alterna = 1;
                             regionsQueue.add(region);
-                            System.out.println("Processando região: " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
-                            Toast.makeText(mContext, "Adicionada " + region.getNome(), Toast.LENGTH_SHORT).show();
+                            System.out.println("Processando região: " + "Região Restrita" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            Toast.makeText(mContext, "Adicionada " + "Região Restrita", Toast.LENGTH_SHORT).show();
                             System.out.println("A fila será impressa a seguir:");
                             printRegionsQueue();
                             alterna = 1;
@@ -165,15 +163,14 @@ public class AddRegion extends Thread {
                                 // Criar um mapa de dados para o objeto Region
                                 Map<String, Object> data = new HashMap<>();
 
-                                data.put("name", region.getNome());
+                                data.put("name", region.getName());
                                 data.put("latitude", region.getLatitude());
                                 data.put("longitude", region.getLongitude());
                                 data.put("user", region.getUser());
                                 data.put("timestamp", region.getTimestamp());
 
 
-
-                                String colecao = null;
+                                String colecao;
 
                                 if(region instanceof SubRegion){
                                     colecao = "Sub Região";
@@ -185,8 +182,6 @@ public class AddRegion extends Thread {
 
                                 } else {
                                     colecao = "Região";
-                                    data.put("mainRegion", ("Nulo"));
-
                                 }
 
                                 // Adicionar os dados ao Firestore
@@ -230,7 +225,7 @@ public class AddRegion extends Thread {
             semaphore.acquire();
             synchronized (regionsQueue) {
                 for (Region region : regionsQueue) {
-                    System.out.println("User: " +region.getUser()+ " Ordem: "+ ordem + "° - " + region.getNome() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude()+ ", Time: " + region.getTimestamp());
+                    System.out.println("User: " +region.getUser()+ " Ordem: "+ ordem + "° - " + region.getName() + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude()+ ", Time: " + region.getTimestamp());
                     ordem = ordem + 1;
                 }
                 ordem = 1;
@@ -250,7 +245,7 @@ public class AddRegion extends Thread {
         JsonUtil gson = new JsonUtil();
         String regionJson = gson.toJson(region);
         try {
-            region.setNome(Cryptography.encrypt(region.getNome()));
+            region.setNome(Cryptography.encrypt(region.getName()));
             region.setLatitude(Cryptography.encrypt(String.valueOf(region.getLatitude())));
             region.setLongitude(Cryptography.encrypt(String.valueOf(region.getLongitude())));
             region.setTimestamp(Cryptography.encrypt(String.valueOf(region.getTimestamp())));
