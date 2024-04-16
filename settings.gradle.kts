@@ -16,6 +16,13 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        maven {
+            url = uri("https://maven.pkg.github.com/vitor-laudares/AtividadeAutAvan")
+            credentials {
+                username = "vitor-laudares"
+                password = "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"
+            }
+        }
     }
 }
 
