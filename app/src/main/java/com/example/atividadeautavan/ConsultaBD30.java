@@ -35,8 +35,12 @@ public class ConsultaBD30 extends Thread{
 
     @Override
     public void run(){
-
+        long startTime = System.currentTimeMillis();
         varrerDb();
+        long endTime = System.currentTimeMillis();
+        System.out.println("TEMPO DE COMPUTAÇÂO VARRER BD: " + (endTime - startTime));
+
+
     }
 
     public void varrerDb() {

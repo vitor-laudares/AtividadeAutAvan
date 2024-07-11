@@ -35,8 +35,11 @@ public class ConsultaFila30 extends Thread{
 
     @Override
     public void run(){
-
+        long startTime = System.currentTimeMillis();
         isTooClose();
+        long endTime = System.currentTimeMillis();
+        System.out.println("TEMPO DE COMPUTAÇÂO VARRER FILA: " + (endTime - startTime));
+
 
     }
 

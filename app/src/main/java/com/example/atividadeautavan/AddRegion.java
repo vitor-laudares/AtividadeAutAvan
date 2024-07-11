@@ -48,6 +48,10 @@ public class AddRegion extends Thread {
 
 
     public void addRegion(double lat, double lon, Context mContext) {
+
+        long startTime = System.currentTimeMillis();
+
+
         AtomicBoolean ResBd = new AtomicBoolean();
         ResBd.set(false);
         AtomicBoolean ResFila = new AtomicBoolean();
@@ -81,7 +85,7 @@ public class AddRegion extends Thread {
                         serialize(region);
 
                         regionsQueue.add(region);
-                            System.out.println("Processando: " + "Localização Atual" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
+                            System.out.println("Processando: " + "Região" + ", Latitude: " + region.getLatitude() + ", Longitude: " + region.getLongitude() + ", Time: " + region.getTimestamp());
                             Toast.makeText(mContext, "Região adicionada", Toast.LENGTH_SHORT).show();
                             System.out.println("A fila será impressa a seguir:");
                             printRegionsQueue();
@@ -143,14 +147,20 @@ public class AddRegion extends Thread {
             }
         }catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         } finally {
             semaphore.release(); // Libera a permissão do semáforo
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("TEMPO DE COMPUTAÇÂO ADICIONAR NA FILA: " + (endTime - startTime));
     }
 
     @Override
     public void run() {
+
         while (true) {
+
             synchronized (regionsQueue) {
                 if (!regionsQueue.isEmpty()) {
                     Region region = regionsQueue.peekLast();
@@ -206,7 +216,6 @@ public class AddRegion extends Thread {
                                         });
                             }
                             Toast.makeText(mContext, "Regiões Adicionadas no BD e removidas da fila", Toast.LENGTH_SHORT).show();
-
                         }
 
                     });
@@ -218,6 +227,7 @@ public class AddRegion extends Thread {
                 e.printStackTrace();
             }
         }
+
     }
 
     public void printRegionsQueue() {
@@ -241,19 +251,35 @@ public class AddRegion extends Thread {
         mainRegion = mainRegion1;
     }
 
-    public void serialize(Region region) {
+    public void serialize(Region region) throws Exception {
+        long startTime = System.currentTimeMillis();
+
         JsonUtil gson = new JsonUtil();
         String regionJson = gson.toJson(region);
+        JsonObject jsonObject = gson.fromJson(regionJson, JsonObject.class);
+
+        String name = jsonObject.get("name").getAsString();
+        String encryptedName = Cryptography.encrypt(name);
+        String latitude = jsonObject.get("latitude").getAsString();
+        String encryptedLatitude = Cryptography.encrypt(latitude);
+        String longitude = jsonObject.get("longitude").getAsString();
+        String encryptedLongitude = Cryptography.encrypt(longitude);
+        String user = jsonObject.get("user").getAsString();
+        String encryptedUser = Cryptography.encrypt(user);
+        String timestamp = jsonObject.get("timestamp").getAsString();
+        String encryptedTimestamp = Cryptography.encrypt(timestamp);
         try {
-            region.setNome(Cryptography.encrypt(region.getName()));
-            region.setLatitude(Cryptography.encrypt(String.valueOf(region.getLatitude())));
-            region.setLongitude(Cryptography.encrypt(String.valueOf(region.getLongitude())));
-            region.setTimestamp(Cryptography.encrypt(String.valueOf(region.getTimestamp())));
-            region.setUser(Cryptography.encrypt(String.valueOf(region.getUser())));
+            region.setNome(encryptedName);
+            region.setLatitude(encryptedLatitude);
+            region.setLongitude(encryptedLongitude);
+            region.setTimestamp(encryptedTimestamp);
+            region.setUser(encryptedUser);
 
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+        long endTime = System.currentTimeMillis();
+        System.out.println("TEMPO DE COMPUTAÇÂO CRIPTOGRAFIA: " + (endTime - startTime));
     }
 
 

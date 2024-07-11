@@ -37,6 +37,9 @@ import android.os.Handler;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
@@ -61,6 +64,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         addRegion.start();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        int numThreads = Runtime.getRuntime().availableProcessors(); // qtd processadores disponíveis
+        System.out.println("NUMERO DE PROCESSADORES DISPONIVEIS: " + (numThreads));
+
+        ExecutorService executor = Executors.newFixedThreadPool(1); // qtd a ser usados
         mapSearchView = findViewById(R.id.mapSearch);
         mapSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

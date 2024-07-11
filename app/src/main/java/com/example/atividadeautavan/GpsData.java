@@ -51,8 +51,13 @@ public class GpsData extends Thread implements LocationListener {
 
     @Override
     public void run() {
+        long startTime = System.currentTimeMillis();
         requestLocation();
         handler.postDelayed(this, 100);
+        long endTime = System.currentTimeMillis();
+        System.out.println("TEMPO DE COMPUTAÇÂO GPS DATA: " + (endTime - startTime));
+
+
     }
 
     @Override
